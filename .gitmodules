@@ -1,0 +1,3 @@
+[submodule "minic_compiler"]
+	path = minic_compiler
+	url = https://github.com/wzhao18/minic_compiler

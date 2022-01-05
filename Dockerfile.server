@@ -1,0 +1,70 @@
+FROM ubuntu:20.04
+
+ENV TZ=America/Toronto
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+RUN apt-get update -y && \
+    apt-get install -y \
+        cmake \
+        uuid-dev \
+        pkgconf \
+        wget \
+        unzip \
+        gcc \
+        g++ \
+        git \
+        python3.8 \
+        lsb-release \
+        software-properties-common \
+        default-jre \
+        pip
+
+RUN cd /home && \
+    wget http://www.zlib.net/zlib-1.2.11.tar.gz && \
+    tar -xvzf zlib-1.2.11.tar.gz && \
+    cd zlib-1.2.11 && \
+    ./configure && \
+    make && \
+    make install
+
+RUN cd /home && \
+    wget https://apt.llvm.org/llvm.sh && \
+    chmod +x llvm.sh && \
+    ./llvm.sh 11
+
+COPY minic_compiler /home/minic_compiler
+
+RUN cd /home/minic_compiler/thirdparty/antlr4/runtime/Cpp && \
+    mkdir build && \
+    cd build && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local -DANTLR4_INSTALL=True -DCMAKE_CXX_COMPILER=g++ && \
+    make -j$(nproc) && \
+    make install
+
+RUN cd /home/minic_compiler && \
+    mkdir -p build && \
+    cd build && \
+    cmake .. && \
+    make -j$(nproc) && \
+    mv clang-mini /usr/local/bin && \
+    mv minicc/minicio/libminicio.a /usr/local/lib
+
+RUN python3 /home/minic_compiler/test/tester.py
+
+COPY minic_server /home/minic_server
+COPY minic_messaging /home/minic_messaging
+COPY minic_logger /home/minic_logger
+COPY minic_ltm /home/minic_ltm
+
+RUN pip install --upgrade pip && \
+    pip install /home/minic_server && \
+    pip install /home/minic_messaging && \
+    pip install /home/minic_logger && \
+    pip install /home/minic_ltm
+
+EXPOSE 23450
+
+CMD gunicorn \
+    -c /home/minic_server/config/gunicorn_config.py \
+    --log-level DEBUG \
+    "minic_server.restapi.gunicorn:create_app()"

@@ -1,0 +1,22 @@
+// Test 3: Conditionals
+
+#include "minicio.h"
+
+bool isTen(int a) {
+    if (a != 10) 
+        return false;
+    return true;
+}
+
+int main() {
+    int myScore, yourScore;
+    myScore = 10;
+    yourScore = minic_add(5, 5);
+
+    if (isTen(myScore) && isTen(yourScore)) {
+        print_int(1);
+        return 1;
+    }
+    print_int(0);
+    return 0;
+}
