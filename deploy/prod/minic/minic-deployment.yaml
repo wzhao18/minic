@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minic
+  labels:
+    app: minic
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minic
+  template:
+    metadata:
+      labels:
+        app: minic
+    spec:
+      containers:
+      - name: minic
+        image: teemo222/minic-server:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 23450
+        env:
+          - name: MONGO_HOST
+            value: mongo
+          - name: MONGO_PORT
+            value: "27017"
+          - name: RABBITMQ_HOST
+            value: rabbitmq
+          - name: ENFORCE_EMAIL_VERIFICATION
+            value: "True"

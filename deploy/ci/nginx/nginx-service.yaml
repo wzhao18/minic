@@ -1,0 +1,20 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  type: LoadBalancer
+  ports:
+    - name: minic-server-nginx-port
+      protocol: TCP
+      port: 33450
+    - name: minic-webclient-nginx-port
+      protocol: TCP
+      port: 33451
+    - name: minic-email-server-nginx-port
+      protocol: TCP
+      port: 33452
+  selector:
+    app: nginx

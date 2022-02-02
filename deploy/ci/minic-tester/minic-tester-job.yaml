@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: minic-tester
+  labels:
+    app: minic-tester
+spec:
+  template:
+    spec:
+      containers:
+        - image: teemo222/minic-tester:ci
+          imagePullPolicy: Always
+          name: minic-tester
+          env:
+            - name: MINIC_SERVER_HOST
+              value: nginx
+            - name: MINIC_SERVER_PORT
+              value: "33450"
+      restartPolicy: Never
+  backoffLimit: 0

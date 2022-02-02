@@ -1,0 +1,13 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: minic
+  labels:
+    app: minic
+spec:
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 23450
+  selector:
+    app: minic

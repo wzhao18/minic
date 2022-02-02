@@ -1,0 +1,13 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: minic-email-server
+  labels:
+    app: minic-email-server
+spec:
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 23452
+  selector:
+    app: minic-email-server

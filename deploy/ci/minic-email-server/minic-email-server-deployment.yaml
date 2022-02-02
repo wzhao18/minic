@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minic-email-server
+  labels:
+    app: minic-email-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minic-email-server
+  template:
+    metadata:
+      labels:
+        app: minic-email-server
+    spec:
+      containers:
+      - name: minic-email-server
+        image: teemo222/minic-email-server:ci
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 23452
+        env:
+          - name: MONGO_HOST
+            value: mongo
+          - name: MONGO_PORT
+            value: "27017"
+          - name: RABBITMQ_HOST
+            value: rabbitmq
+          - name: EMAIL_SERVER_PORT
+            value: "33452"
+          - name: EMAIL_SERVER_HOST
+            value: localhost

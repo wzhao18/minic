@@ -1,0 +1,46 @@
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config-map
+data:
+  nginx.conf: | 
+    user nginx;
+
+    events {
+        worker_connections 1000;
+    }
+    http {
+        upstream minic-backend-server {
+            server minic:23450 fail_timeout=5s max_fails=5;
+        }
+
+        upstream minic-frontend-webclient {
+            ip_hash;
+            server minic-webclient:23451 fail_timeout=5s max_fails=5;
+        }
+
+        upstream minic-backend-email-server {
+            ip_hash;
+            server minic-email-server:23452 fail_timeout=5s max_fails=5;
+        }
+
+        server {
+            listen 33450;
+            location / {
+                proxy_pass http://minic-backend-server;
+            }
+        }
+        server {
+            listen 33451;
+            location / {
+                proxy_pass http://minic-frontend-webclient;
+            }
+        }
+        server {
+            listen 33452;
+            location / {
+                proxy_pass http://minic-backend-email-server;
+            }
+        }
+    }

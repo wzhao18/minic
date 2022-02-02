@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minic-webclient
+  labels:
+    app: minic-webclient
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minic-webclient
+  template:
+    metadata:
+      labels:
+        app: minic-webclient
+    spec:
+      containers:
+      - name: minic-webclient
+        image: teemo222/minic-webclient:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 23451
+        env:
+          - name: MINIC_SERVER_HOST
+            value: nginx
+          - name: MINIC_SERVER_PORT
+            value: "33450"

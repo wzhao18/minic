@@ -1,0 +1,21 @@
+FROM ubuntu:20.04
+
+ENV TZ=America/Toronto
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+USER root
+
+RUN apt-get update -y && \
+    apt-get install -y \
+        python3.8 \
+        pip
+
+COPY minic_client /home/minic_client
+COPY minic_server/test /home/test
+COPY wait-for-it.sh /home/wait-for-it.sh
+
+RUN pip install --upgrade pip && \
+    pip install /home/minic_client && \
+    pip install -r /home/test/requirements.txt
+
+CMD ./home/wait-for-it.sh ${MINIC_SERVER_HOST}:${MINIC_SERVER_PORT} --timeout=600 --strict -- python3 /home/test/tester.py

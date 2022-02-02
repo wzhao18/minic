@@ -13,9 +13,11 @@ This repository contains code for the project **minic**. It composes of a compil
 * [**Nginx**](https://github.com/wzhao18/minic/tree/master/nginx)
   * Reverse proxy and load balancer that allows scaling of all the servers mentioned above in minic. 
 
-## How to run ##
+## Deploy ##
 
-The project can be easily run with the support of [docker compose](https://docs.docker.com/compose/). 
+The project can be deployed either with [Docker Compose](https://docs.docker.com/compose/) or [Kubernetes](https://kubernetes.io/).  
+
+Docker Compose:
 
 ```
 git clone https://github.com/wzhao18/minic --recursive
@@ -23,6 +25,48 @@ cd minic
 mkdir -p data/mongo
 docker compose up
 ```
+
+Kubernetes:
+
+```
+kubectl create ns minic
+kustomize build deploy/prod | kubectl -n minic apply -f -
+kubectl port-forward service/nginx -n minic 33450:33450 33451:33451 33452:33452
+```
+
+Visit http://localhost:33451 for the webclient.
+
 ## Scaling ##
 
-To scale up the servers, increase the setting of **replicas** in the [`docker-compose.yaml`](https://github.com/wzhao18/minic/blob/master/docker-compose.yaml). Alternatively for MiniC-Server, change the setting of environment variables in [`gunicorn_config.py`](https://github.com/wzhao18/minic/blob/master/minic_server/config/gunicorn_config.py).
+To scale up the servers, increase the setting of **replicas** in the [`docker-compose.yaml`](https://github.com/wzhao18/minic/blob/master/docker-compose.yaml) or the Kubernetes deployment files depending on the way of deployment. For MiniC-Server, the number of threads and processes can be set through environment variables in [`gunicorn_config.py`](https://github.com/wzhao18/minic/blob/master/minic_server/config/gunicorn_config.py).
+
+## CI/CD ##
+
+Deploy an instance of [Jenkins](https://www.jenkins.io/) server along with a worker agent:
+
+```
+mkdir jenkins
+docker run \
+  -d --rm \
+  --name=jenkins \
+  -p 8080:8080 \
+  -p 50000:50000 \
+  -v ${PWD}/jenkins:/var/jenkins_home \
+  jenkins/jenkins
+docker build -t jenkins-agent -f Dockerfile.jenkins-agent .
+docker run \
+  -i -d --rm --name agent \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  --init --network=host \
+  jenkins-agent \
+  java -jar /usr/share/jenkins/agent.jar \
+  -jnlpUrl http://localhost:8080/computer/agent/jenkins-agent.jnlp \
+  -secret [PASTE SECRET HERE] -workDir "/home/jenkins/agent"
+```
+
+Creating a local kubernetes cluster with [minikube](https://minikube.sigs.k8s.io/docs/):
+
+```
+minikube start --vm-driver virtualbox
+kubectl config view --minify --flatten > kubeconfig
+```

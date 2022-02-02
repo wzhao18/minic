@@ -1,0 +1,17 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: rabbitmq
+  labels:
+    app: rabbitmq
+spec:
+  type: NodePort
+  ports:
+    - name: rabbitmq-port
+      protocol: TCP
+      port: 5672
+    - name: rabbitmq-mgmt-port
+      protocol: TCP
+      port: 15672
+  selector:
+    app: rabbitmq
